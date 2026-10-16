@@ -7,49 +7,29 @@ import java.util.List;
 @RequestMapping("/products")
 public class ProductController {
 
-    private final ProductRepository productRepository;
+    private final ProductService productService;
 
-    public ProductController(ProductRepository productRepository) {
-        this.productRepository = productRepository;
+    public ProductController(ProductService productService) {
+        this.productService = productService;
     }
 
     @GetMapping
-    public List<Product> getAll() {
-        return productRepository.findAll();
-    }
+    public List<Product> getAll() { return productService.getAll(); }
 
     @GetMapping("/{id}")
-    public Product getById(@PathVariable Long id) {
-        return productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-    }
+    public Product getById(@PathVariable Long id) { return productService.getById(id); }
+
+    @GetMapping("/search")
+    public List<Product> search(@RequestParam String name) { return productService.search(name); }
 
     @PostMapping
-    public Product add(@RequestBody Product product) {
-        return productRepository.save(product);
+    public Product add(@RequestBody Product product) { return productService.create(product); }
+
+    @PutMapping("/{id}")
+    public Product update(@PathVariable Long id, @RequestBody Product product) {
+        return productService.update(id, product);
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-        productRepository.deleteById(id);
-    }
-
-    // GET /products/search?name=key
-    @GetMapping("/search")
-    public List<Product> search(@RequestParam String name) {
-        return productRepository.findByNameContaining(name);
-    }
-
-    // PUT /products/1  -> update an existing product
-    @PutMapping("/{id}")
-    public Product update(@PathVariable Long id, @RequestBody Product updated) {
-        Product existing = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-
-        existing.setName(updated.getName());
-        existing.setPrice(updated.getPrice());
-        existing.setStock(updated.getStock());
-
-        return productRepository.save(existing);
-    }
+    public void delete(@PathVariable Long id) { productService.delete(id); }
 }
